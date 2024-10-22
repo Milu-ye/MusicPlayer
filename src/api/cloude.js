@@ -1,4 +1,5 @@
 import { preventRepeatedLoading, cloudeRequest } from './request'
+import store from '@/store'
 export const getaccountInfo = () => {
   return cloudeRequest({
     url: '/user/account',
@@ -63,6 +64,26 @@ export const getUserPlaylist = (uid) => {
     method: 'get',
     params: {
       uid
+    }
+  })
+}
+//喜欢该音乐
+export const likeSong = (id, like) => {
+  return cloudeRequest({
+    url: '/like',
+    method: 'get',
+    params: {
+      id,
+      like
+    }
+  })
+}
+
+//获取喜欢歌单
+export const getLikeList = () => {
+  return cloudeRequest.get('/likelist', {
+    params: {
+      uid: store.state.accountInfo.profile?.userId
     }
   })
 }

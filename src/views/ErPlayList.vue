@@ -4,6 +4,7 @@
             :data="songPlayList.slice(0, over)" :height="tableHeight" :style="tableStyle.elTableStyle" max-height="610"
             :fit="false" :row-style="tableStyle.rowStyle" :cell-style="tableStyle.cellStyle"
             :header-cell-style="tableStyle.headerCellStyle" :header-row-style="tableStyle.headerRowStyle">
+
             <el-table-column label="#" :width="tableWidth[0]">
                 <template #default="{ $index }">
                     <div style="font-size: 12px;font-weight: 600;">
@@ -109,8 +110,11 @@ const transformPlayCount = (num) => {
     if (num < 100000) {
         return num
     }
-    else {
+    else if (num < 100000000) {
         return Math.round(num / 10000) + '万'
+    }
+    else {
+        return Math.round(num / 100000000) + '亿'
     }
 }
 //#endregion

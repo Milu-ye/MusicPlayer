@@ -1,7 +1,7 @@
 import { createStore } from 'vuex'
 import { cloudeRequest } from '@/utils/request'
 import axios from 'axios'
-import { getaccountInfo } from '../api/cloude'
+import { getaccountInfo, getLikeList } from '../api/cloude'
 export default createStore({
   state: {
     musicList: [], //渲染列表
@@ -38,11 +38,7 @@ export default createStore({
     async requestLikeList({ commit, state }) {
       const {
         data: { ids }
-      } = await cloudeRequest.get('/likelist', {
-        params: {
-          uid: state.accountInfo?.profile?.userId
-        }
-      })
+      } = await getLikeList()
       commit('GETLIKELIST', ids)
     }
   },
@@ -81,6 +77,10 @@ export default createStore({
       }
       console.log(state.playList)
       state.playList.splice(state.currentPlay, 0, val)
+    },
+    //替换整个播放列表
+    CHANGEALLPLAYLIST(state, list) {
+      state.playList = list
     },
     //播放下一首
     NEXTPLAY(state) {

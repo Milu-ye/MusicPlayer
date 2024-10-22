@@ -7,6 +7,7 @@ import { computed, onMounted, watch } from 'vue'
 import { useStore } from 'vuex';
 import getSongInfo from './hooks/useIdGetSongInfo';
 const store = useStore()
+console.log(store.state.playList.length != 0 && store.state.playList[store.state.currentPlay])
 let currentPlay = computed(() => {
   return store.state.currentPlay
 })

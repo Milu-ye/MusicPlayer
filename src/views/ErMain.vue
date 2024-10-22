@@ -14,8 +14,9 @@
                     <el-col :span="24">
                         <div class="mainContaint">
                             <router-view v-slot="{ Component }">
-
-                                <component :is="Component"></component>
+                                <keep-alive>
+                                    <component :is="Component"></component>
+                                </keep-alive>
                             </router-view>
                         </div>
                     </el-col>
