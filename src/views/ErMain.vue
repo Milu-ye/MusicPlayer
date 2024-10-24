@@ -1,6 +1,6 @@
 <template>
     <div class="container">
-        <el-row style="height: 90%;">
+        <el-row style="height: 90%;overflow: hidden;">
             <el-col style="display: flex; justify-content: center;padding-top: 2vh;padding-bottom: 2vh;" :span="4">
                 <ErAside></ErAside>
             </el-col>
@@ -14,22 +14,32 @@
                     <el-col :span="24">
                         <div class="mainContaint">
                             <router-view v-slot="{ Component }">
-                                <keep-alive>
-                                    <component :is="Component"></component>
-                                </keep-alive>
+
+                                <component :is="Component"></component>
+
                             </router-view>
                         </div>
                     </el-col>
                 </el-row>
 
             </el-col>
+            <div :class="{
+                'lyrics_container': true,
+                'lyrics_container_show': isShowLyrics
+            }" :style="{
+                background: `url(${store.state.playList[store.state.currentPlay]?.al?.picUrl})`,
+                backgroundPosition: '50%'
+            }">
+                <SongLyrics @sendIsShowLyrics="getIsShowLyrics"></SongLyrics>
+            </div>
         </el-row>
-        <el-row style="height: 10%;">
+
+        <el-row style="height: 10%;z-index: 90;">
             <el-col :span="24">
-                <MusicPlayer></MusicPlayer>
+                <MusicPlayer v-model:isShowLyrics="isShowLyrics"></MusicPlayer>
             </el-col>
         </el-row>
-        <div class="playList_container" :class="{ playList_hidden: !store.state.isShowPlayList }">
+        <div class="playList_container" :class="{ playList_hidden: !store.state.isShowPlayList, }">
             <div class="exitPlayList" @click="store.commit('CHANGESHOWPLAYLIST')">
                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor"
                     class="bi bi-chevron-right" viewBox="0 0 16 16">
@@ -46,6 +56,7 @@
 </template>
 
 <script setup>
+import SongLyrics from '@/components/SongLyrics.vue';
 import PlayList from '@/components/PlayList.vue';
 import Erheader from '@/components/ErHeadr.vue';
 import ErAside from '@/components/ErAside.vue';
@@ -54,6 +65,12 @@ import { useStore } from 'vuex';
 import { ref } from 'vue'
 const loading = ref(true)
 const store = useStore()
+//是否展示歌词模块
+const isShowLyrics = ref(false)
+const getIsShowLyrics = (val) => {
+    isShowLyrics.value = val
+    console.log(val)
+}
 </script>
 
 <style lang="less" scoped>
@@ -78,7 +95,7 @@ const store = useStore()
         height: 90%;
         right: 0;
         top: 0;
-        z-index: 100;
+        z-index: 50;
         display: flex;
 
         .exitPlayList {
@@ -117,6 +134,20 @@ const store = useStore()
     height: 100%;
     border-top-left-radius: 6px;
     border-top-right-radius: 6px;
+}
+
+.lyrics_container {
+    width: 100%;
+    height: 100%;
+
+    position: absolute;
+    z-index: 100;
+    transition: all 0.2s;
+    top: 120%
+}
+
+.lyrics_container_show {
+    top: 0
 }
 
 :deep(.el-loading-mask) {

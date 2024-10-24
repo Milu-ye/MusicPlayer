@@ -13,16 +13,17 @@
                     }}
                 </p>
             </div>
+
         </div>
         <div class="center">
             <div class="control">
-                <svg @click="likeMusic(true)" v-if="!isLikeSong(store.state.playList[store.state.currentPlay].id)"
+                <svg @click="likeMusic(true)" v-if="!isLikeSong(store.state.playList[store.state.currentPlay]?.id)"
                     xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" class="bi bi-heart"
                     viewBox="0 0 16 16">
                     <path
                         d="m8 2.748-.717-.737C5.6.281 2.514.878 1.4 3.053c-.523 1.023-.641 2.5.314 4.385.92 1.815 2.834 3.989 6.286 6.357 3.452-2.368 5.365-4.542 6.286-6.357.955-1.886.838-3.362.314-4.385C13.486.878 10.4.28 8.717 2.01L8 2.748zM8 15C-7.333 4.868 3.279-3.04 7.824 1.143c.06.055.119.112.176.171a3.12 3.12 0 0 1 .176-.17C12.72-3.042 23.333 4.867 8 15z" />
                 </svg>
-                <svg @click="likeMusic(false)" v-if="isLikeSong(store.state.playList[store.state.currentPlay].id)"
+                <svg @click="likeMusic(false)" v-if="isLikeSong(store.state.playList[store.state.currentPlay]?.id)"
                     xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor"
                     class="bi bi-heart-fill" viewBox="0 0 16 16" style="margin-left:6px;color: red; cursor: pointer;">
                     <path fill-rule="evenodd"
@@ -113,9 +114,21 @@
                         d="M13 5.466V1.534a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384l-2.36 1.966a.25.25 0 0 1-.41-.192zm0 9v-3.932a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384l-2.36 1.966a.25.25 0 0 1-.41-.192z" />
                 </svg>
             </div>
+            <div id="btn_ly">
+                <svg @click="changeShowLyric" v-if="isShowLyrics" xmlns="http://www.w3.org/2000/svg" width="19"
+                    height="25" fill="currentColor" class="bi bi-caret-up-fill" viewBox="0 0 16 16">
+                    <path
+                        d="m7.247 4.86-4.796 5.481c-.566.647-.106 1.659.753 1.659h9.592a1 1 0 0 0 .753-1.659l-4.796-5.48a1 1 0 0 0-1.506 0z" />
+                </svg>
+                <svg @click="changeShowLyric" v-if="!isShowLyrics" xmlns="http://www.w3.org/2000/svg" width="19"
+                    height="25" fill="currentColor" class="bi bi-caret-down-fill" viewBox="0 0 16 16">
+                    <path
+                        d="M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z" />
+                </svg>
+            </div>
         </div>
         <audio @volumechange="volumechange" @ended="playMode" @loadeddata="init_music" @timeupdate="getpasstime"
-            ref="hidden_player" :src="currentMusicUrl || ''"></audio>
+            ref="hidden_player" :src="currentMusicUrl"></audio>
     </div>
 
 </template>
@@ -137,6 +150,9 @@ const duration = ref(null)
 const duration_str = ref(null)
 let currentTime = ref(null)
 let currentTime_str = ref("00:00")
+const emit = defineEmits(['send-is-show-lyrics'])
+
+
 //监视currenMusicUrl的变化以便音乐更新时自动播放
 let currentMusicUrl = computed(() => {
     return store.state.currentMusicUrl
@@ -249,6 +265,11 @@ const playMode = () => {
             store.commit('UPDATECURRENTPLAY', Math.floor(Math.random() * (store.state.playList.length)))
     }
 }
+//歌词展示
+const isShowLyrics = defineModel('isShowLyrics');
+const changeShowLyric = () => {
+    isShowLyrics.value = !isShowLyrics.value
+}
 onMounted(() => {
     currentVol.value.style.height = `${localStorage.getItem('volume') * 100}%`
     //组件加载时自动更新上次播放音乐
@@ -272,6 +293,11 @@ onMounted(() => {
         padding-top: 2%;
         display: flex;
         align-items: center;
+
+        svg {
+            color: white;
+            cursor: pointer;
+        }
 
         svg:active {
             transition: all 0.1s;
@@ -335,11 +361,19 @@ onMounted(() => {
             }
         }
 
+        #btn_ly {
+            display: flex;
+            align-items: start;
+            height: 100%;
+            transform: translateX(10%);
+
+        }
+
         #playmode {
             display: flex;
             align-items: start;
             height: 100%;
-            width: 20%;
+
 
             svg {
                 color: white;

@@ -31,6 +31,8 @@ const getCreatePlayList = () => {
 const getCollectPlayList = () => {
     store.commit('GETSONGPLAYLIST', userPlaylist.filter(item => item.creator?.nickname != store.state.accountInfo.profile?.nickname))
 }
+//向父组件发送是否展示歌单列表
+
 onMounted(() => {
     getUserPlaylist(store.state.accountInfo.account?.id).then(({ data }) => {
         Object.assign(userPlaylist, data.playlist);

@@ -87,3 +87,13 @@ export const getLikeList = () => {
     }
   })
 }
+
+//获取歌词
+export const getLyrics = (id) => {
+  return cloudeRequest({
+    url: '/lyric',
+    params: {
+      id
+    }
+  })
+}

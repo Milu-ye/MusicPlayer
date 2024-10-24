@@ -15,6 +15,7 @@ declare module 'vue' {
     ElTableColumn: typeof import('element-plus/es')['ElTableColumn']
     ErAside: typeof import('./src/components/ErAside.vue')['default']
     ErHeadr: typeof import('./src/components/ErHeadr.vue')['default']
+    IEpArrowDownBold: typeof import('~icons/ep/arrow-down-bold')['default']
     IEpArrowLeft: typeof import('~icons/ep/arrow-left')['default']
     IEpArrowLeftBold: typeof import('~icons/ep/arrow-left-bold')['default']
     IEpArrowRightBold: typeof import('~icons/ep/arrow-right-bold')['default']
@@ -23,6 +24,7 @@ declare module 'vue' {
     PlayList: typeof import('./src/components/PlayList.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
+    SongLyrics: typeof import('./src/components/SongLyrics.vue')['default']
   }
   export interface ComponentCustomProperties {
     vLoading: typeof import('element-plus/es')['ElLoadingDirective']

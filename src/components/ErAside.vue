@@ -13,8 +13,12 @@
                 </el-icon>
             </div>
         </div>
-        <div class="list function">12</div>
-        <div class="list user">12</div>
+
+        <div class="list user">
+            <p class="smallTitle">
+                推荐
+            </p>
+        </div>
         <div class="list myList">
             <p class="smallTitle">我的</p>
             <div @click="jumpToMylove" class="content">
@@ -129,8 +133,9 @@ const formHistory = async () => {
     store.commit('GETMUSICLIST', musiclist)
 }
 const jumpToHistory = () => {
-    router.push({ name: 'historymusic' });
     formHistory();
+    router.push({ name: 'historymusic' });
+
 }
 //#endregion
 onMounted(() => {

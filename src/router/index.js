@@ -8,13 +8,13 @@ import HistoryList from '@/views/ErHistoryList.vue'
 import PlayList from '@/views/ErPlayList.vue'
 import Myplaylist from '@/views/MyPlaylist.vue'
 import ErPlayList from '@/views/ErPlayList.vue'
+import SongLyrics from '@/components/SongLyrics.vue'
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
     {
       path: '/',
       name: 'begin',
-      redirect: '/home',
       component: Main,
       children: [
         {
