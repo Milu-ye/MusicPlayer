@@ -16,7 +16,6 @@ declare module 'vue' {
     ErAside: typeof import('./src/components/ErAside.vue')['default']
     ErHeadr: typeof import('./src/components/ErHeadr.vue')['default']
     IEpArrowDownBold: typeof import('~icons/ep/arrow-down-bold')['default']
-    IEpArrowLeft: typeof import('~icons/ep/arrow-left')['default']
     IEpArrowLeftBold: typeof import('~icons/ep/arrow-left-bold')['default']
     IEpArrowRightBold: typeof import('~icons/ep/arrow-right-bold')['default']
     IEpSearch: typeof import('~icons/ep/search')['default']

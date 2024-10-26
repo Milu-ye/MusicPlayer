@@ -11,7 +11,7 @@
                             <span class="index" style="font-size: 12px;font-weight: 600;">
                                 {{ $index + 1 }}
                             </span>
-                            <svg v-if="(store.state.musicList?.[$index].id) != (store.state.playList.length != 0 && store.state.playList[store.state.currentPlay].id) || !isPlay"
+                            <svg v-if="(store.state.musicList?.[$index].id) != (store.state.playList.length != 0 && store.state.playList?.[store.state.currentPlay]?.id) || !isPlay"
                                 @click="play(store.state.musicList[$index])" xmlns="http://www.w3.org/2000/svg"
                                 width="22" height="22" fill="currentColor" class="bi bi-play-fill" viewBox="0 0 16 16">
                                 <path
@@ -97,7 +97,7 @@ import getSingers from '@/hooks/useGetSingers';
 import { useRoute } from 'vue-router';
 import { cloudeRequest } from '@/utils/request';
 import transformTime from '../hooks/useTransformTimeStamp'
-import { onMounted, onUnmounted, reactive, ref } from 'vue';
+import { onMounted, onUnmounted, reactive, ref, watch } from 'vue';
 import { useStore } from 'vuex';
 import emitter from '@/utils/emitter';
 import isLikeSong from '@/hooks/isLikeSong';
@@ -105,6 +105,9 @@ import * as tableStyle from '@/utils/el-table_style'
 const route = useRoute()
 const store = useStore()
 const over = ref(store.state.initSongNum)
+watch(route, () => {
+    over.value = store.state.initSongNum
+})
 //table表格自适应高度
 const tableContainer = ref(null)
 const tableHeight = ref(0)

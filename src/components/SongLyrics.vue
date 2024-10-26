@@ -12,7 +12,7 @@
                         <div class="img_wrap">
                             <img :style="{
                                 animationPlayState: isPlay ? 'running' : 'paused'
-                            }" :src="store.state.playList[store.state.currentPlay]?.al?.picUrl" alt="">
+                            }" :src="store.state.playList[currentPlay]?.al?.picUrl" alt="">
                         </div>
                     </div>
                 </div>
@@ -20,14 +20,14 @@
             <el-col style="height: 100%;" :span="12">
                 <div id="right">
                     <div class="songInfo">
-                        <h2>{{ store.state.playList[store.state.currentPlay]?.name }}</h2>
+                        <h2>{{ store.state.playList[currentPlay]?.name }}</h2>
                         <div>
-                            <p>专辑: {{ store.state.playList[store.state.currentPlay]?.al?.name }}</p>
-                            <p>歌手: {{ getSingers(store.state.currentPlay, store.state.playList) }}</p>
+                            <p>专辑: {{ store.state.playList[currentPlay]?.al?.name }}</p>
+                            <p>歌手: {{ getSingers(currentPlay, store.state.playList) }}</p>
                         </div>
                     </div>
-                    <div class="lyrics_container">
-                        <p :style="{
+                    <div ref="lyrics_container" class="lyrics_container">
+                        <p :ref="`lyricline`" :style="{
                             transform: isStress ? 'scale(1.1)' : '',
                         }" v-for="(item, key) in lyrics" :key="key">
                             {{ item }}
@@ -42,7 +42,7 @@
 
 <script setup>
 import { useStore } from 'vuex';
-import { onMounted, reactive, ref } from 'vue'
+import { computed, nextTick, onMounted, reactive, ref, watch } from 'vue'
 import getSingers from '@/hooks/useGetSingers';
 import emitter from '@/utils/emitter';
 import { getLyrics } from '@/api/cloude';
@@ -66,18 +66,108 @@ const transformLyrics = async (id) => {
     lyric = lyric.split("\n");
     let temp = {};
     lyric.forEach(item => {
-        if (item.length > 11) {
-            temp[item.slice(1, 10)] = item.slice(11)
+        if (item.length > item.indexOf(']') + 1) {
+
+            temp[item.slice(1, item.indexOf(']'))] = item.slice(item.indexOf(']') + 1)
         }
     });
+
+    for (let key in lyrics) {
+        delete lyrics[key]
+    }
     Object.assign(lyrics, temp)
-    console.log(lyric)
-    console.log(lyrics)
+    timeList = Object.keys(lyrics).map(val => transformTimeIntoSecond(val))
 }
-const isStress = ref(false)
+//当歌曲变化
+const lyrics_container = ref(null)
+const currentPlay = computed(() => {
+    return store.state.currentPlay
+})
+watch(currentPlay, (newVal) => {
+    transformLyrics(store.state.playList[newVal]?.id)
+
+
+})
+//接收歌曲播放的时间
+const nowTime = ref(0)
+emitter.on('sendTime', (time) => {
+    nowTime.value = time;
+
+})
+//歌词随播放滚动
+let timeList = [];
+//跟新歌词当前行
+let nowLineIndex = ref(0)
+watch(nowTime, () => {
+
+    nowLineIndex.value = timeList.findIndex(item => nowTime.value < item) - 1;
+    for (let i = 0; i < timeList.length; i++) {
+        if (i != nowLineIndex.value) {
+            lyrics_container.value.children[i].style.color = 'black'
+        }
+        else if (i == nowLineIndex.value) {
+            lyrics_container.value.children[i].style.color = 'white'
+        }
+    }
+    if (nowLineIndex.value < 0) {
+        lyrics_container.value.children[timeList.length - 1].style.color = 'white'
+    }
+    // console.log(lyrics_container.value.scrollTop)
+})
+//歌词滚动平滑动画
+let timer;
+emitter.on('cleanInterval', () => {
+    clearInterval(timer);
+})
+const smoothScroll = (el, walk, target) => {
+    console.log('scrollTo', el.scrollTop)
+    console.log('target', target)
+    clearInterval(timer);
+    if (target > 0) {
+        let speed = Math.floor((target - el.scrollTop) / walk);
+
+        if (speed > 0) {
+            timer = setInterval(() => {
+                if (el.scrollTop >= target || el.scrollTop + el.clientHeight >= el.scrollHeight) {
+                    clearInterval(timer);
+                }
+                else {
+                    console.log('timer')
+                    el.scrollTop += speed;
+                }
+            }, 3)
+        }
+        else {
+            timer = setInterval(() => {
+                if (el.scrollTop <= target || el.scrollTop <= 0) {
+                    clearInterval(timer);
+                }
+                else {
+                    console.log('timer')
+                    el.scrollTop += speed;
+                }
+            }, 3)
+        }
+
+
+    }
+    else {
+        el.scrollTop = 0
+    }
+}
+watch(nowLineIndex, (newVal) => {
+    if (newVal >= 0) {
+        smoothScroll(lyrics_container.value, 80, lyrics_container.value.children[0].offsetHeight * newVal)
+    }
+
+})
+//字符串分秒形式时间转秒  00:02.233
+const transformTimeIntoSecond = (timeStr) => {
+    return parseFloat(timeStr.slice(0, 2)) * 60 + parseFloat(timeStr.slice(3))
+}
 //#endregion
 onMounted(() => {
-    transformLyrics(store.state.playList[store.state.currentPlay]?.id)
+    transformLyrics(store.state.playList[currentPlay.value]?.id)
 })
 </script>
 
@@ -112,7 +202,7 @@ section {
                 img {
                     width: 70%;
                     border-radius: 50%;
-                    animation: rotating 60s linear infinite forwards;
+                    animation: rotating 120s linear infinite forwards;
                 }
             }
 
@@ -132,7 +222,7 @@ section {
             align-items: center;
             justify-content: center;
             background-color: rgba(6, 6, 6, 0.4);
-            transition: all 0.1s;
+
 
             &:active {
                 transform: translateY(20%) scale(0.96);
@@ -168,6 +258,7 @@ section {
         }
 
         .lyrics_container {
+            transition: all 0.5s;
             display: flex;
             flex-direction: column;
             overflow: auto;
@@ -176,6 +267,7 @@ section {
             margin-top: 2vh;
             align-items: center;
             position: relative;
+            justify-content: space-around;
 
             &::before {
                 position: absolute;
@@ -189,8 +281,9 @@ section {
             }
 
             p {
+                transform: translateY(1.3vh);
                 font-size: 21px;
-                margin-top: 2vh;
+                padding-top: 2.2vh;
                 color: #111;
             }
         }

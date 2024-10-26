@@ -15,7 +15,9 @@
                         <div class="mainContaint">
                             <router-view v-slot="{ Component }">
 
-                                <component :is="Component"></component>
+                                <keep-alive include="ErMusicList">
+                                    <component :is="Component"></component>
+                                </keep-alive>
 
                             </router-view>
                         </div>
@@ -141,9 +143,18 @@ const getIsShowLyrics = (val) => {
     height: 100%;
 
     position: absolute;
-    z-index: 100;
+    z-index: 1;
     transition: all 0.2s;
-    top: 120%
+    top: 120%;
+
+    &::after {
+        width: 100%;
+        height: 100%;
+        content: '';
+        position: absolute;
+
+
+    }
 }
 
 .lyrics_container_show {

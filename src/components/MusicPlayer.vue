@@ -1,7 +1,8 @@
 <template>
     <div class="player">
         <div class="left">
-            <img :src="(store.state.playList.length != 0 && store.state.playList[store.state.currentPlay].al.picUrl) || 'https://p1.music.126.net/6y-UleORITEDbvrOLV0Q8A==/5639395138885805.jpg'"
+            <img @click="changeShowLyric"
+                :src="(store.state.playList.length != 0 && store.state.playList[store.state.currentPlay].al.picUrl) || 'https://p1.music.126.net/6y-UleORITEDbvrOLV0Q8A==/5639395138885805.jpg'"
                 alt="">
 
             <div class="songinfo">
@@ -127,8 +128,8 @@
                 </svg>
             </div>
         </div>
-        <audio @volumechange="volumechange" @ended="playMode" @loadeddata="init_music" @timeupdate="getpasstime"
-            ref="hidden_player" :src="currentMusicUrl"></audio>
+        <audio @seeking="seeking" @volumechange="volumechange" @ended="playMode" @loadeddata="init_music"
+            @timeupdate="updateTime" ref="hidden_player" :src="currentMusicUrl"></audio>
     </div>
 
 </template>
@@ -141,6 +142,10 @@ import getSingers from '@/hooks/useGetSingers';
 import emitter from '@/utils/emitter';
 import isLikeSong from '@/hooks/isLikeSong';
 import { likeSong, getLikeList } from '@/api/cloude'
+//当播放位置开始跳转
+const seeking = () => {
+    emitter.emit('cleanInterval');
+}
 //音乐控制组件
 const store = useStore()
 let isPlay = ref(false)
@@ -151,7 +156,6 @@ const duration_str = ref(null)
 let currentTime = ref(null)
 let currentTime_str = ref("00:00")
 const emit = defineEmits(['send-is-show-lyrics'])
-
 
 //监视currenMusicUrl的变化以便音乐更新时自动播放
 let currentMusicUrl = computed(() => {
@@ -171,18 +175,23 @@ watch(currentMusicUrl, () => {
 watch(isPlay, (newVal) => {
     emitter.emit('sendisPlay', newVal);
 })
-//获取音乐总时长
+//音乐加载完成的初始化
 const init_music = () => {
     duration_str.value = transformTimeStamp(hidden_player.value.duration)
     duration.value = hidden_player.value.duration
     hidden_player.value.volume = localStorage.getItem('volume')
 }
-//音乐加载完成的初始化
+//得到播放时
+const updateTime = () => {
+    getpasstime()
+    emitter.emit('sendTime', currentTime.value)
+}
 const getpasstime = () => {
     currentTime_str.value = transformTimeStamp(hidden_player.value.currentTime)
     currentTime.value = hidden_player.value.currentTime;
-
 }
+//将经过的时间发送给歌词组件
+
 //播放开关
 const play_pause = () => {
     if (!isPlay.value) {
@@ -245,24 +254,26 @@ const nextPlay = () => {
 }
 //播放模式
 let mode = ref(0); //0:单曲循环,1:列表循环,2:随机播放
-const randomList = reactive([])
 const changeMode = () => {
     mode.value++;
     if (mode.value == 3) {
         mode.value = 0;
     }
+    localStorage.setItem('mode', mode.value);
 }
 const playMode = () => {
-    switch (mode.value) {
-        case 0:
-            hidden_player.value.currentTime = 0;
-            hidden_player.value.play();
-            break;
-        case 1:
-            nextPlay()
-            break;
-        case 2:
-            store.commit('UPDATECURRENTPLAY', Math.floor(Math.random() * (store.state.playList.length)))
+    if (mode.value == 0) {
+        hidden_player.value.currentTime = 0;
+        hidden_player.value.play();
+
+    }
+    else if (mode.value == 1) {
+        nextPlay()
+
+    }
+    else {
+        store.commit('UPDATECURRENTPLAY', Math.floor(Math.random() * (store.state.playList.length)))
+
     }
 }
 //歌词展示
@@ -274,6 +285,8 @@ onMounted(() => {
     currentVol.value.style.height = `${localStorage.getItem('volume') * 100}%`
     //组件加载时自动更新上次播放音乐
     store.dispatch('updateCurrentMusicUrl')
+    mode.value = localStorage.getItem('mode') || 0
+
 })
 
 
@@ -316,7 +329,7 @@ onMounted(() => {
                 box-sizing: content-box;
 
                 position: absolute;
-                z-index: 10;
+                z-index: 100;
                 top: -230%;
                 left: 50%;
                 transform: translate(-50%, 8%);
@@ -394,6 +407,7 @@ onMounted(() => {
         img {
             width: 15%;
             border-radius: 5px;
+            cursor: pointer;
         }
 
         .songinfo {
